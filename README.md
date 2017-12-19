@@ -1,2 +1,2 @@
 # 17Sys
-forking to server multiple clients at once
+forking to serve multiple clients at once
