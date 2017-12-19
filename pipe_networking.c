@@ -12,7 +12,15 @@
   returns the file descriptor for the upstream pipe.
   =========================*/
 int server_setup() {
-  return -1;
+  remove("upstream");
+  mkfifo("upstream", 0777);
+  char buffer[HANDSHAKE_BUFFER_SIZE];
+
+  from_client = open(buffer, O_RDONLY, 0);
+  int fd = read(from_client, buffer, sizeof(buffer));
+  
+  remove("upstream");
+  return fd;
 }
 
 

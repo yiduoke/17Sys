@@ -20,7 +20,7 @@ int main(){
 	char buffer[BUFFER_SIZE];
 
 	while (1){
-		from_client = server_handshake(&to_client);
+		from_client = server_handshake(&to_client); // we can't use server_handshake
 	   while (read(from_client, buffer, sizeof(buffer))){//this can be a wrapped function for the subserver
 		printf("received: [%s] \n", buffer);
 		process(buffer);
