@@ -13,13 +13,13 @@
   =========================*/
 int server_setup() {
   remove("upstream");
-  int n = mkfifo("upstream", 0777);
+  mkfifo("upstream", 0777);
   char buffer[HANDSHAKE_BUFFER_SIZE];
-  int from_client = open("upstream", O_RDONLY);
-  if(from_client == -1) printf("error: %s", strerror(errno));
+
+  int from_client = open(buffer, O_RDONLY);
   read(from_client, buffer, sizeof(buffer));
-  remove("upstream");
   
+  remove("upstream");
   return from_client;
 }
 
