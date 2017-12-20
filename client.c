@@ -1,12 +1,24 @@
 #include "pipe_networking.h"
+#include <signal.h>
+
+static void sighandler(int signo) {
+  if (signo == SIGINT) {
+    char buffer[HANDSHAKE_BUFFER_SIZE];
+    sprintf(buffer, "%d", getpid());
+    remove(buffer);
+    exit(0);
+  }
+}
 
 int main() {
-
-  int to_server;
-  int from_server;
+  signal(SIGINT, sighandler);
+  
+  int to_server = 0;
+  int from_server = 0;
   char buffer[BUFFER_SIZE];
 
   from_server = client_handshake( &to_server );
+  printf("downstream: %d\n", from_server);
 
   while (1) {
     printf("enter data: ");

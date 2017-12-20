@@ -12,13 +12,13 @@
   returns the file descriptor for the upstream pipe.
   =========================*/
 int server_setup() {
-  remove("upstream");
-  int n = mkfifo("upstream", 0777);
-  char buffer[HANDSHAKE_BUFFER_SIZE];
-  int from_client = open("upstream", O_RDONLY);
-  if(from_client == -1) printf("error: %s", strerror(errno));
-  read(from_client, buffer, sizeof(buffer));
-  remove("upstream");
+  remove("luigi");
+  mkfifo("luigi", 0777);
+  
+  int from_client = open("luigi", O_RDONLY);
+  
+  remove("luigi");
+  printf("setup done\n");
   
   return from_client;
 }
@@ -33,11 +33,17 @@ int server_setup() {
   returns the file descriptor for the downstream pipe.
   =========================*/
 int server_connect(int from_client) {
-  int *downstream;
-  server_handshake(downstream);
-  write(*downstream, "done", 5);
+  char buffer[BUFFER_SIZE];
+  read(from_client, buffer, sizeof(buffer));
+  printf("server read: %s\n", buffer);
   
-  return *downstream;
+  int to_client = open(buffer, O_WRONLY);
+  write(to_client, ACK, sizeof(buffer));
+  
+  read(from_client, buffer, sizeof(buffer));
+  printf("received ack: %s\n", buffer);
+  printf("connect done\n");
+  return to_client;
 }
 
 /*=========================
@@ -50,7 +56,7 @@ int server_connect(int from_client) {
   returns the file descriptor for the upstream pipe.
   =========================*/
 int server_handshake(int *to_client) {
-
+  
   int from_client;
 
   char buffer[HANDSHAKE_BUFFER_SIZE];
@@ -89,20 +95,20 @@ int server_handshake(int *to_client) {
 int client_handshake(int *to_server) {
 
   int from_server;
-  char buffer[HANDSHAKE_BUFFER_SIZE];
+  char buffer[BUFFER_SIZE];
 
   //send pp name to server
   printf("[client] handshake: connecting to wkp\n");
-  *to_server = open( "luigi", O_WRONLY, 0);
+  *to_server = open( "luigi", O_WRONLY);
   if ( *to_server == -1 )
     exit(1);
 
   //make private pipe
   sprintf(buffer, "%d", getpid() );
   mkfifo(buffer, 0600);
-
+  
   write(*to_server, buffer, sizeof(buffer));
-
+  
   //open and wait for connection
   from_server = open(buffer, O_RDONLY, 0);
   read(from_server, buffer, sizeof(buffer));
